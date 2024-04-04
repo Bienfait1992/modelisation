@@ -22,33 +22,32 @@ id        Int     @id @default(autoincrement())
 Matricule String @unique
 Tag_machines   machines @relation(fields: [machinesId], references: [id])
 machinesId Int
-Code_cohorte Cohorte @relation(fields: [code_cohorteId], references: [id])
+Code_cohorte cohorte @relation(fields: [code_cohorteId], references: [id])
 code_cohorteId Int
 Prenom    String
 Nom       String
 Postnom   String
-Date_de_naissance DateTime
+Date_de_naissance String
 Adresse   String
 Email     String
-Telephone Int
+Telephone String
 }
 
 model Session  {
 id          Int     @id @default(autoincrement())
 Id_session String @unique
-cohorteId      Int  
 Annee       String
 Type        String
 Ville       String
-chorte      Cohorte[]
+chorte      cohorte[]
 }
 
-model Cohorte  {
+model cohorte  {
 id          Int     @id @default(autoincrement())
 Code_cohorte Int     @unique
 Description String
-code_session     Session   @relation(fields: [code_sessionId], references: [id])
-code_sessionId Int   
+Id_session     Session   @relation(fields: [Id_sessionId], references: [id])
+Id_sessionId Int   
 apprenant   Apprenant[]
 coaching Coaching []
 
@@ -60,7 +59,7 @@ Matricule_coach     String    @unique
 Prenom              String
 Nom                 String
 Postnom             String
-Date_de_naissance  DateTime 
+Date_de_naissance   String
 Adresse             String
 Email               String
 Telephone           String
@@ -72,15 +71,8 @@ model Coaching  {
 id          Int     @id @default(autoincrement())
 Matricule_coach     Coaches @relation(fields: [coachesId], references: [id])  
 coachesId             Int
-Code_chorte         Cohorte   @relation(fields: [cohorteId], references: [id])  
+Code_chorte         cohorte   @relation(fields: [cohorteId], references: [id])  
 cohorteId              Int
 
 }
 
-// model Apprentissage  {
-// id                      Int         @id @default(autoincrement())
-// Matricule_coach     Coaches         @relation(fields: [coachesId], references: [id]) 
-// coachesId                  Int
-// Matricule_apprenant    Apprenant    @relation(fields: [apprenantId], references: [id])  
-// apprenantId                Int     
-// }

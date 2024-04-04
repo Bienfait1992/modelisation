@@ -1,33 +1,53 @@
 require("dotenv").config();
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
+const apprenantRouter = require("./prisma/src/routeurs/apprenantsRoute");
 const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
 
 
-const { Apprenant, machines, Cohorte } = new PrismaClient();
-app.get("/", (req, res) => {
-  res.send("Hello");
-});
+const {machines, cohorte, session, coaches} = new PrismaClient();
 
-// app.get("/machines", async (req, res) => {
+// app.post("/", async (req, res) => {
+  
 //   try {
-//     const machines = await machines.findMany({
-//       include: {
-//         apprenants: {
-//           select: {
-//             nom: true,
-//           },
-//         },
-//       },
-//     });
-//     res.send(machines);
+//     const newApprenant = req.body;
+//     console.log(newApprenant);
+//     const addedApprenant = await Apprenant.create({ data: newApprenant });
+//     res.status(200).send(addedApprenant);
 //   } catch (error) {
 //     console.log(error.message);
-//     res.status(500).send("Nous avons un probleme technique");
+//     res.status(500).send(error.message);
 //   }
 // });
+
+// app.get("/", async(req, res) =>{
+// try{
+//   const data = await Apprenant.findMany();
+//   res.status(500).send(data);
+// }catch(error){
+//   res.status(500).send(error.message);
+// }
+  
+// });
+app.get("/machines", async (req, res) => {
+  try {
+    const machines = await machines.findMany({
+      include: {
+        apprenants: {
+          select: {
+            nom: true,
+          },
+        },
+      },
+    });
+    res.send(machines);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send("Nous avons un probleme technique");
+  }
+});
 
 app.post("/machines", async (req, res) => {
   try {
@@ -41,7 +61,15 @@ app.post("/machines", async (req, res) => {
 });
 app.get("/machines", async (req , res) => {
   try{
-    const data = await machines.findMany();
+    const data = await machines.findMany({
+      include:{
+        apprenant:{
+          select:{
+            Nom: true
+          }
+        }
+      }
+    });
     res.send(data)
   }catch (error) {
     console.log(error.message);
@@ -49,26 +77,129 @@ app.get("/machines", async (req , res) => {
   }
 
 });
+app.post("/Session", async (req , res) =>{
+  try{
+    const newSession = req.body;
+    const AddedSession = await session.create({ data: newSession});
+    res.status(200).send(AddedSession);
+  }catch(error){
+    console.log(error.message);
+    res.status(500).send(error.message);
+  }
+});
+
+app.get("/Session", async (req , res) =>{
+  try{
+    const data = await session.findMany();
+    res.send(data)
+  }catch(error){
+    res.status(500).send(error.message);
+  }
+});
+
 app.post("/cohorte", async (req , res) =>{
 try{
   const newCohorte = req.body;
-  const AddedCohorte = await Cohorte.create({ data: newCohorte});
+  const AddedCohorte = await cohorte.create({ data: newCohorte});
+  res.status(200).send(AddedCohorte);
 }catch(error){
-  res.status.send(error.message);
-
+  console.log(error.message);
+  res.status(500).send(error.message);
 }
-  
+
 });
-app.post("/apprenants", async (req, res) => {
+
+app.get("/cohorte", async (req , res) =>{
+  try{
+    const data = await cohorte.findMany({
+      include:{
+        apprenant:true,
+      }
+    });
+    res.send(data)
+  }catch(error){
+    res.status(500).send(error.message);
+  }
+
+});
+
+
+
+
+app.post("/coaches", async (req, res) => {
   try {
-    const newApprenant = req.body;
-    const addedApprenant = await Apprenant.create({ data: newApprenant });
-    res.status(200).send(addedApprenant);
+    const newCoaches = req.body;
+    const addedCoaches = await coaches.create({ data: newCoaches });
+    res.status(200).send(addedCoaches);
   } catch (error) {
     console.log(error.message);
     res.status(500).send(error.message);
   }
 });
+
+app.get("/coaches", async (req, res) =>{
+  try{
+    const data= await coaches.findMany();
+    res.status(500).send(data);
+  }catch (error) {
+    console.log(error.message);
+    res.status(500).send(error.message);
+  }
+  
+});
+
+app.get("/coaches/:id", async (req, res) =>{
+  try{
+    const {id} = req.params
+    const data= await coaches.findUnique({
+      where :{
+        id : +id
+      },
+    });
+    res.status(500).send(data);
+  }catch (error) {
+    console.log(error.message);
+    res.status(500).send(error.message);
+  }
+  
+});
+
+app.put("/coaches/:id", async (req, res) =>{
+  try{
+    const {id} = req.params
+    const data= await coaches.update({
+      where :{
+        id : +id
+      },
+      data:req.body,
+    });
+    res.status(500).send(data);
+  }catch (error) {
+    console.log(error.message);
+    res.status(500).send(error.message);
+  }
+  
+});
+
+app.delete("/coaches/:id", async (req, res) =>{
+  try{
+    const {id} = req.params
+    const data= await coaches.delete({
+      where :{
+        id : +id
+      },
+    });
+    res.status(500).send(data);
+  }catch (error) {
+    console.log(error.message);
+    res.status(500).send(error.message);
+  }
+  
+});
+
+
+app.use('/apprenant',apprenantRouter )
+
 app.listen(PORT, () => {
   console.log(`le serveur écoute sur le port ${PORT}`);
 });
